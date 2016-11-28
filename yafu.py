@@ -110,7 +110,7 @@ class RecordExpander(dict):
 
       if var == 'expired':
          return (self._record['expires'] != 'max' and
-                 self._record['date_ts'] > self._record['expire_ts'])
+                 time() > self._record['expire_ts'])
 
       if var == 'expired_str':
          return 'EXPIRED ' if self['expired'] else ''
