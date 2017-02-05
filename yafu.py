@@ -128,13 +128,15 @@ class RecordExpander(dict):
          return datetime.fromtimestamp(self._record['expire_ts']).strftime(self._args.date_format)
          
       if var == 'direct_url':
-         return '{base_url}/{id}/{basename_escaped}'.format(**self)
+         return '%s/%s/%s' % (
+                 self['base_url'], self['id'], self['basename_escaped'] )
 
       if var == 'info_url':
-         return '{base_url}/info/{id}/{basename_escaped}'.format(**self)
+         return '%s/info/%s/%s' % (
+                 self['base_url'], self['id'], self['basename_escaped'] )
 
       if var == 'deletion_url':
-         return '{base_url}/delete/{delete_id}'.format(**self)
+         return '%s/delete/%s' % (self['base_url'], self['delete_id'])
 
       if var == 'basename':
          return basename(self._record['file'])
