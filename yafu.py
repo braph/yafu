@@ -96,7 +96,7 @@ class RecordExpander(dict):
          try:
             var = RECORD_SHORTCUTS[var]
          except:
-            raise Exception("Record shortcut not found: " + var)
+            raise Exception('Record shortcut not found: ' + var)
 
       if var in self._record:
          return self._record[var]
@@ -169,7 +169,8 @@ def yafu_delete(url):
 
 def yafu_upload(file, args):
 
-   ul_files = { 'upload': open(file, 'rb') }
+   ul_files = { 'upload': open(file, 'rb').read() }
+   # https://stackoverflow.com/questions/33717690/python-requests-post-with-unicode-filenames
 
    ul_parameters = {
       'filename':    basename(file),
