@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # yafu - command line client for YaFU
 # Copyright (C) 2016 Benjamin Abendroth
