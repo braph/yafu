@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse, requests, re, pickle
+import argparse, requests, re, os, pickle
 from time import time
 from datetime import datetime, timedelta
 from os.path import expanduser, isfile, basename, devnull
@@ -168,6 +168,8 @@ def yafu_delete(url):
    response = requests.post(url, data=params)
 
 def yafu_upload(file, args):
+   if os.path.getsize(file) > 95000000:
+      raise Exception("File too big")
 
    ul_files = { 'upload': open(file, 'rb').read() }
    # https://stackoverflow.com/questions/33717690/python-requests-post-with-unicode-filenames
@@ -230,12 +232,15 @@ except:
 
 if args.upload:
    for file in args.upload:
-      record = yafu_upload(file, args)
+      try:
+        record = yafu_upload(file, args)
 
-      fmt_record = RecordExpander(record, args)
-      print(args.format.safe_substitute(fmt_record))
+        fmt_record = RecordExpander(record, args)
+        print(args.format.safe_substitute(fmt_record))
 
-      record_storage.append(record)
+        record_storage.append(record)
+      except Exception as e:
+        print(file + ':', e)
 
 elif args.delete:
    for url in args.delete:
