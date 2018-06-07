@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse, requests, re, os, pickle
+from lxml import html
 from time import time
 from datetime import datetime, timedelta
 from os.path import expanduser, isfile, basename, devnull
@@ -53,6 +54,7 @@ actions = actions.add_mutually_exclusive_group(required=True)
 actions.add_argument('-d', '--delete',  help='Delete the given links', metavar='URL', nargs='+')
 actions.add_argument('-u', '--upload',  help='Files to upload', metavar='FILE', nargs='+')
 actions.add_argument('-l', '--list',    help='List the records in database', action='store_true')
+actions.add_argument('-L', '--list-remote', help='List files on server', action='store_true')
 
 # UPLOAD ACTION
 ulcmd = parser.add_argument_group('Upload Options')
@@ -73,6 +75,11 @@ listcmd.add_argument('--show-expired',   help='List also expired records', actio
 listcmd.add_argument('--date-format',    help='Specify date format')
 listcmd.add_argument('-n', '--number',   help='Only list the last N records', type=int)
 listcmd.add_argument('-f', '--format',   help='Specify output format', type=Template)
+
+# REMOTE LIST ACTION
+rlistcmd = parser.add_argument_group('List Remote Options')
+#rlistcmd.add_argument('-d', '--download', help='Download files')
+#rlistcmd.add_argument('-p', '--password', help='Download files')
 
 parser.set_defaults(
    db =           '~/.config/yafu.db', 
@@ -223,6 +230,22 @@ def yafu_upload(file, args):
 
    return record
 
+def yafu_list_remote(base_url):
+    r = requests.get(base_url + '/?action=listfiles')
+    t = html.fromstring(r.content)
+
+    for tr in t.xpath('//tbody/tr'):
+        tds = tr.xpath('.//td')
+
+        a = tds[1].xpath('.//a')[0]
+        url = '%s%s' % ('http://pixelbanane.de', a.attrib['href'])
+        name = a.text_content()
+        pw = True if tds[2].xpath('.//img') else False
+        size = tds[3].text_content()
+        expires = tds[4].xpath('text()')[0]
+        #print(name, url, pw, size, expires)
+        print(url)
+
 args = parser.parse_args()
 
 try:
@@ -248,5 +271,8 @@ elif args.delete:
 
 elif args.list:
    yafu_list(record_storage, args) 
+
+elif args.list_remote:
+    yafu_list_remote(args.base_url)
 
 pickle.dump(record_storage, open(args.db, 'wb'))
